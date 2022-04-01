@@ -3944,6 +3944,10 @@ PlayView.prototype = $extend(GameState.prototype,{
 		};
 		this.setupGame();
 		this.addEventListener($bind(this,this.onEvent));
+		var manager = hxd_snd_Manager.get();
+		manager.masterVolume = 0.5;
+		manager.masterChannelGroup.addEffect(new hxd_snd_effect_Reverb(hxd_snd_effect_ReverbPreset.DRUGGED));
+		manager.masterChannelGroup.addEffect(new hxd_snd_effect_Pitch(0.5));
 	}
 	,setupGame: function() {
 		this.resetText.set_visible(false);
@@ -3964,6 +3968,7 @@ PlayView.prototype = $extend(GameState.prototype,{
 			if(this.state == State.WaitingForTouch) {
 				this.state = State.Playing;
 				this.setRandomBallVel();
+				hxd_Res.get_loader().loadCache("start.wav",hxd_res_Sound).play();
 			}
 		}
 		var _this = this.paddle;
@@ -3982,7 +3987,7 @@ PlayView.prototype = $extend(GameState.prototype,{
 	}
 	,update: function(dt) {
 		this.pointsText.set_text("" + this.points);
-		if(this.state == State.WaitingForTouch) {
+		if(this.state == State.WaitingForTouch || this.state == State.Dead) {
 			return;
 		}
 		var fh = this.ball;
@@ -3996,12 +4001,14 @@ PlayView.prototype = $extend(GameState.prototype,{
 			_this.posChanged = true;
 			_this.x = this.ballSize * 0.5;
 			this.ballVel.x *= -1;
+			hxd_Res.get_loader().loadCache("blip.wav",hxd_res_Sound).play();
 		}
 		if(this.ball.x + this.ballSize * 0.5 > this.playWidth) {
 			var _this = this.ball;
 			_this.posChanged = true;
 			_this.x = this.playWidth - this.ballSize * 0.5;
 			this.ballVel.x *= -1;
+			hxd_Res.get_loader().loadCache("blip.wav",hxd_res_Sound).play();
 		}
 		if(this.ball.y - this.ballSize * 0.5 < this.wallSize) {
 			var _this = this.ball;
@@ -4009,6 +4016,7 @@ PlayView.prototype = $extend(GameState.prototype,{
 			_this.y = this.wallSize + this.ballSize * 0.5;
 			this.ballVel.y *= -1;
 			this.points += 1;
+			hxd_Res.get_loader().loadCache("blip.wav",hxd_res_Sound).play();
 		}
 		if(this.ball.y + this.ballSize * 0.5 > this.paddle.y) {
 			if(this.state == State.Playing && this.ball.x + this.ballSize > this.paddle.x - this.paddleWidth / 2 && this.ball.x - this.ballSize < this.paddle.x + this.paddleWidth / 2) {
@@ -4016,6 +4024,7 @@ PlayView.prototype = $extend(GameState.prototype,{
 				_this.posChanged = true;
 				_this.y = this.paddle.y - this.ballSize * 0.5;
 				this.setRandomBallVel();
+				hxd_Res.get_loader().loadCache("blip.wav",hxd_res_Sound).play();
 			} else {
 				this.state = State.MissedBall;
 			}
@@ -31370,6 +31379,7 @@ hxd_res_NanoJpeg.prototype = {
 	,__class__: hxd_res_NanoJpeg
 };
 var hxd_res_Sound = function(entry) {
+	this.lastPlay = 0.;
 	hxd_res_Resource.call(this,entry);
 };
 hxd_res_Sound.__name__ = "hxd.res.Sound";
@@ -31398,6 +31408,19 @@ hxd_res_Sound.prototype = $extend(hxd_res_Resource.prototype,{
 			this.watch($bind(this,this.watchCallb));
 		}
 		return this.data;
+	}
+	,play: function(loop,volume,channelGroup,soundGroup) {
+		if(volume == null) {
+			volume = 1.;
+		}
+		if(loop == null) {
+			loop = false;
+		}
+		this.lastPlay = HxOverrides.now() / 1000;
+		this.channel = hxd_snd_Manager.get().play(this,channelGroup,soundGroup);
+		this.channel.loop = loop;
+		this.channel.set_volume(volume);
+		return this.channel;
 	}
 	,watchCallb: function() {
 		var old = this.data;
@@ -31444,6 +31467,16 @@ hxd_snd_ChannelBase.prototype = {
 			}
 		}
 		this.currentVolume = this.volume;
+	}
+	,addEffect: function(e) {
+		if(e == null) {
+			throw haxe_Exception.thrown("Can't add null effect");
+		}
+		if(this.effects.indexOf(e) >= 0) {
+			throw haxe_Exception.thrown("effect already added on this channel");
+		}
+		this.effects.push(e);
+		return e;
 	}
 	,removeEffect: function(e) {
 		HxOverrides.remove(this.effects,e);
@@ -31890,6 +31923,29 @@ hxd_snd_Manager.prototype = {
 			ch = ch.next;
 		}
 		return new hxd_impl_ArrayIterator_$hxd_$snd_$Channel(result);
+	}
+	,play: function(sound,channelGroup,soundGroup) {
+		if(soundGroup == null) {
+			soundGroup = this.masterSoundGroup;
+		}
+		if(channelGroup == null) {
+			channelGroup = this.masterChannelGroup;
+		}
+		var sdat = sound.getData();
+		if(sdat.samples == 0) {
+			throw haxe_Exception.thrown(Std.string(sound) + " has no samples");
+		}
+		var c = new hxd_snd_Channel();
+		c.sound = sound;
+		c.duration = sdat.get_duration();
+		c.manager = this;
+		c.soundGroup = soundGroup;
+		c.channelGroup = channelGroup;
+		c.next = this.channels;
+		c.isLoading = sdat.isLoading();
+		c.isVirtual = this.driver == null;
+		this.channels = c;
+		return c;
 	}
 	,updateVirtualChannels: function(now) {
 		var c = this.channels;
@@ -32751,6 +32807,48 @@ hxd_snd_effect_Pitch.__super__ = hxd_snd_Effect;
 hxd_snd_effect_Pitch.prototype = $extend(hxd_snd_Effect.prototype,{
 	__class__: hxd_snd_effect_Pitch
 });
+var hxd_snd_effect_Reverb = function(preset) {
+	hxd_snd_Effect.call(this,"reverb");
+	this.wetDryMix = 100.0;
+	this.loadPreset(preset != null ? preset : hxd_snd_effect_ReverbPreset.DEFAULT);
+};
+hxd_snd_effect_Reverb.__name__ = "hxd.snd.effect.Reverb";
+hxd_snd_effect_Reverb.__super__ = hxd_snd_Effect;
+hxd_snd_effect_Reverb.prototype = $extend(hxd_snd_Effect.prototype,{
+	loadPreset: function(preset) {
+		this.room = preset.room;
+		this.roomHF = preset.roomHF;
+		this.roomRolloffFactor = preset.roomRolloffFactor;
+		this.decayTime = preset.decayTime;
+		this.decayHFRatio = preset.decayHFRatio;
+		this.reflections = preset.reflections;
+		this.reflectionsDelay = preset.reflectionsDelay;
+		this.reverb = preset.reverb;
+		this.reverbDelay = preset.reverbDelay;
+		this.diffusion = preset.diffusion;
+		this.density = preset.density;
+		this.hfReference = preset.hfReference;
+	}
+	,__class__: hxd_snd_effect_Reverb
+});
+var hxd_snd_effect_ReverbPreset = function(room,roomHF,roomRolloffFactor,decayTime,decayHFRatio,reflections,reflectionsDelay,reverb,reverbDelay,diffusion,density,hfReference) {
+	this.room = room;
+	this.roomHF = roomHF;
+	this.roomRolloffFactor = roomRolloffFactor;
+	this.decayTime = decayTime;
+	this.decayHFRatio = decayHFRatio;
+	this.reflections = reflections;
+	this.reflectionsDelay = reflectionsDelay;
+	this.reverb = reverb;
+	this.reverbDelay = reverbDelay;
+	this.diffusion = diffusion;
+	this.density = density;
+	this.hfReference = hfReference;
+};
+hxd_snd_effect_ReverbPreset.__name__ = "hxd.snd.effect.ReverbPreset";
+hxd_snd_effect_ReverbPreset.prototype = {
+	__class__: hxd_snd_effect_ReverbPreset
+};
 var hxd_snd_effect_Spatialization = function() {
 	hxd_snd_Effect.call(this,"spatialization");
 	this.position = new h3d_Vector();
@@ -41742,6 +41840,8 @@ hxd_snd_Manager.MAX_SOURCES = 16;
 hxd_snd_Manager.SOUND_BUFFER_CACHE_SIZE = 256;
 hxd_snd_Manager.VIRTUAL_VOLUME_THRESHOLD = 1e-5;
 hxd_snd_Manager.BUFFER_STREAM_SPLIT = 16;
+hxd_snd_effect_ReverbPreset.DEFAULT = new hxd_snd_effect_ReverbPreset(-1000,-100,0.0,1.49,0.83,-2602,0.007,200,0.011,100.0,100.0,5000.0);
+hxd_snd_effect_ReverbPreset.DRUGGED = new hxd_snd_effect_ReverbPreset(-1000,0,0.0,8.39,1.39,-115,0.002,985,0.03,50.0,42.87,5000.0);
 hxsl_Tools.UID = 0;
 hxsl_Tools.SWIZ = hxsl_Component.__empty_constructs__.slice();
 hxsl_Tools.MAX_CHANNELS_BITS = 3;
