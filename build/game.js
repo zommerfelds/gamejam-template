@@ -166,6 +166,8 @@ HerbalTeaApp.prototype = $extend(hxd_App.prototype,{
 				case ".png":
 					hxd_Res.load(node.get_path()).toTexture();
 					break;
+				case ".txt":
+					break;
 				case ".mp3":case ".wav":
 					hxd_Res.load(node.get_path()).toSound().getData();
 					break;
@@ -177,10 +179,10 @@ HerbalTeaApp.prototype = $extend(hxd_App.prototype,{
 	}
 	,init2: function() {
 		var _gthis = this;
-		haxe_Log.trace("Screen size: " + this.engine.width + "/" + this.engine.height,{ fileName : "lib/HerbalTeaApp.hx", lineNumber : 81, className : "HerbalTeaApp", methodName : "init2"});
+		haxe_Log.trace("Screen size: " + this.engine.width + "/" + this.engine.height,{ fileName : "lib/HerbalTeaApp.hx", lineNumber : 83, className : "HerbalTeaApp", methodName : "init2"});
 		var t0 = HxOverrides.now() / 1000;
 		this.preloadResourcesRec(this.pak.getRoot());
-		haxe_Log.trace("Took " + Utils.floatToStr(HxOverrides.now() / 1000 - t0) + "s to load assets.",{ fileName : "lib/HerbalTeaApp.hx", lineNumber : 86, className : "HerbalTeaApp", methodName : "init2"});
+		haxe_Log.trace("Took " + Utils.floatToStr(HxOverrides.now() / 1000 - t0) + "s to load assets.",{ fileName : "lib/HerbalTeaApp.hx", lineNumber : 88, className : "HerbalTeaApp", methodName : "init2"});
 		var cutoutJs = window.cutout;
 		if(cutoutJs != null) {
 			HerbalTeaApp.cutout.top = cutoutJs.top | 0;
@@ -188,7 +190,7 @@ HerbalTeaApp.prototype = $extend(hxd_App.prototype,{
 			HerbalTeaApp.cutout.left = cutoutJs.left | 0;
 			HerbalTeaApp.cutout.right = cutoutJs.right | 0;
 		}
-		haxe_Log.trace("Loaded Android cutout: " + Std.string(HerbalTeaApp.cutout),{ fileName : "lib/HerbalTeaApp.hx", lineNumber : 97, className : "HerbalTeaApp", methodName : "init2"});
+		haxe_Log.trace("Loaded Android cutout: " + Std.string(HerbalTeaApp.cutout),{ fileName : "lib/HerbalTeaApp.hx", lineNumber : 99, className : "HerbalTeaApp", methodName : "init2"});
 		var startState = "main";
 		var startOcean = "GreenIslands";
 		var startStage = 0;
@@ -217,7 +219,7 @@ HerbalTeaApp.prototype = $extend(hxd_App.prototype,{
 			HerbalTeaApp.cutout.top = Std.parseInt(tmp);
 		}
 		window.addEventListener("error",function(event) {
-			haxe_Log.trace("Error handler: " + Std.string(event.error),{ fileName : "lib/HerbalTeaApp.hx", lineNumber : 133, className : "HerbalTeaApp", methodName : "init2"});
+			haxe_Log.trace("Error handler: " + Std.string(event.error),{ fileName : "lib/HerbalTeaApp.hx", lineNumber : 135, className : "HerbalTeaApp", methodName : "init2"});
 		});
 		var intent = window.intent;
 		if(intent != null && intent.action == "com.google.intent.action.TEST_LOOP") {
@@ -226,7 +228,7 @@ HerbalTeaApp.prototype = $extend(hxd_App.prototype,{
 				testScenario = haxe_ds_Option.Some(intent.extras.scenario);
 			}
 			haxe_Timer.delay(function() {
-				haxe_Log.trace("Testing scenario done",{ fileName : "lib/HerbalTeaApp.hx", lineNumber : 145, className : "HerbalTeaApp", methodName : "init2"});
+				haxe_Log.trace("Testing scenario done",{ fileName : "lib/HerbalTeaApp.hx", lineNumber : 147, className : "HerbalTeaApp", methodName : "init2"});
 				navigator.app.exitApp();
 			},30000);
 		}
@@ -241,7 +243,7 @@ HerbalTeaApp.prototype = $extend(hxd_App.prototype,{
 			tmp = false;
 		}
 		if(tmp) {
-			haxe_Log.trace("testScenario: " + Std.string(testScenario),{ fileName : "lib/HerbalTeaApp.hx", lineNumber : 154, className : "HerbalTeaApp", methodName : "init2"});
+			haxe_Log.trace("testScenario: " + Std.string(testScenario),{ fileName : "lib/HerbalTeaApp.hx", lineNumber : 156, className : "HerbalTeaApp", methodName : "init2"});
 		}
 		switch(testScenario._hx_index) {
 		case 0:
@@ -251,7 +253,7 @@ HerbalTeaApp.prototype = $extend(hxd_App.prototype,{
 				startState = "testScenario1";
 				var simulate = null;
 				simulate = function() {
-					haxe_Log.trace("Simulating tap",{ fileName : "lib/HerbalTeaApp.hx", lineNumber : 161, className : "HerbalTeaApp", methodName : "init2"});
+					haxe_Log.trace("Simulating tap",{ fileName : "lib/HerbalTeaApp.hx", lineNumber : 163, className : "HerbalTeaApp", methodName : "init2"});
 					var $window = hxd_Window.getInstance();
 					var tap = new h2d_col_Point(1,0);
 					var c = Math.cos(0.60);
@@ -280,7 +282,7 @@ HerbalTeaApp.prototype = $extend(hxd_App.prototype,{
 				simulate();
 			} else {
 				var x = _g;
-				haxe_Log.trace("WARNING: test scenario " + x + " doesn't exist",{ fileName : "lib/HerbalTeaApp.hx", lineNumber : 178, className : "HerbalTeaApp", methodName : "init2"});
+				haxe_Log.trace("WARNING: test scenario " + x + " doesn't exist",{ fileName : "lib/HerbalTeaApp.hx", lineNumber : 180, className : "HerbalTeaApp", methodName : "init2"});
 			}
 			break;
 		case 1:
@@ -299,13 +301,13 @@ HerbalTeaApp.prototype = $extend(hxd_App.prototype,{
 				renderTimeTotAvg = (renderTimeTotAvg * counter + HerbalTeaApp.avgRenderTime) / (counter + 1);
 				var drawCalls = _gthis.engine.drawCalls;
 				counter += 1;
-				haxe_Log.trace("Perf[" + counter + "] FPS: " + Utils.floatToStr(fps) + " (" + Utils.floatToStr(fpsAvg) + " avg) updateT: " + Utils.floatToStr(HerbalTeaApp.avgUpdateTime * 1000) + " (" + Utils.floatToStr(updateTimeTotAvg * 1000) + " avg) renderT: " + Utils.floatToStr(HerbalTeaApp.avgRenderTime * 1000) + " (" + Utils.floatToStr(renderTimeTotAvg * 1000) + " avg) draw calls: " + drawCalls,{ fileName : "lib/HerbalTeaApp.hx", lineNumber : 193, className : "HerbalTeaApp", methodName : "init2"});
+				haxe_Log.trace("Perf[" + counter + "] FPS: " + Utils.floatToStr(fps) + " (" + Utils.floatToStr(fpsAvg) + " avg) updateT: " + Utils.floatToStr(HerbalTeaApp.avgUpdateTime * 1000) + " (" + Utils.floatToStr(updateTimeTotAvg * 1000) + " avg) renderT: " + Utils.floatToStr(HerbalTeaApp.avgRenderTime * 1000) + " (" + Utils.floatToStr(renderTimeTotAvg * 1000) + " avg) draw calls: " + drawCalls,{ fileName : "lib/HerbalTeaApp.hx", lineNumber : 195, className : "HerbalTeaApp", methodName : "init2"});
 				haxe_Timer.delay(logStats,1000);
 			};
 			logStats();
 		}
 		if(startState != "") {
-			haxe_Log.trace("startState: " + startState,{ fileName : "lib/HerbalTeaApp.hx", lineNumber : 201, className : "HerbalTeaApp", methodName : "init2"});
+			haxe_Log.trace("startState: " + startState,{ fileName : "lib/HerbalTeaApp.hx", lineNumber : 203, className : "HerbalTeaApp", methodName : "init2"});
 		}
 		if(window.document.addEventListener != null) {
 			window.document.addEventListener("backbutton",$bind(this,this.onBackButton),false);
@@ -313,7 +315,7 @@ HerbalTeaApp.prototype = $extend(hxd_App.prototype,{
 		this.onload();
 	}
 	,onBackButton: function() {
-		haxe_Log.trace("Back button",{ fileName : "lib/HerbalTeaApp.hx", lineNumber : 218, className : "HerbalTeaApp", methodName : "onBackButton"});
+		haxe_Log.trace("Back button",{ fileName : "lib/HerbalTeaApp.hx", lineNumber : 220, className : "HerbalTeaApp", methodName : "onBackButton"});
 		if(this.currentState != null) {
 			this.currentState.onBackButton();
 		}
@@ -335,7 +337,7 @@ HerbalTeaApp.prototype = $extend(hxd_App.prototype,{
 			} catch( _g ) {
 				var _g1 = haxe_Exception.caught(_g);
 				this.currentState = null;
-				haxe_Log.trace("Error was thrown in update. Disabled GameState.",{ fileName : "lib/HerbalTeaApp.hx", lineNumber : 243, className : "HerbalTeaApp", methodName : "update"});
+				haxe_Log.trace("Error was thrown in update. Disabled GameState.",{ fileName : "lib/HerbalTeaApp.hx", lineNumber : 245, className : "HerbalTeaApp", methodName : "update"});
 				throw haxe_Exception.thrown(_g1);
 			}
 		}
@@ -348,7 +350,7 @@ HerbalTeaApp.prototype = $extend(hxd_App.prototype,{
 			} catch( _g ) {
 				var _g1 = haxe_Exception.caught(_g);
 				this.currentState = null;
-				haxe_Log.trace("Error was thrown in renderUpdate. Disabled GameState.",{ fileName : "lib/HerbalTeaApp.hx", lineNumber : 262, className : "HerbalTeaApp", methodName : "render"});
+				haxe_Log.trace("Error was thrown in renderUpdate. Disabled GameState.",{ fileName : "lib/HerbalTeaApp.hx", lineNumber : 264, className : "HerbalTeaApp", methodName : "render"});
 				throw haxe_Exception.thrown(_g1);
 			}
 		}
@@ -359,9 +361,9 @@ HerbalTeaApp.prototype = $extend(hxd_App.prototype,{
 			this.currentState = this.nextState;
 			this.nextState = null;
 			var c = js_Boot.getClass(this.currentState);
-			haxe_Log.trace("Initializing state: " + c.__name__,{ fileName : "lib/HerbalTeaApp.hx", lineNumber : 276, className : "HerbalTeaApp", methodName : "render"});
+			haxe_Log.trace("Initializing state: " + c.__name__,{ fileName : "lib/HerbalTeaApp.hx", lineNumber : 278, className : "HerbalTeaApp", methodName : "render"});
 			this.currentState.init();
-			haxe_Log.trace("Number of objects: " + this.s2d.getObjectsCount(),{ fileName : "lib/HerbalTeaApp.hx", lineNumber : 278, className : "HerbalTeaApp", methodName : "render"});
+			haxe_Log.trace("Number of objects: " + this.s2d.getObjectsCount(),{ fileName : "lib/HerbalTeaApp.hx", lineNumber : 280, className : "HerbalTeaApp", methodName : "render"});
 		}
 		this.renderedCurrentState = true;
 	}
@@ -3835,6 +3837,8 @@ MenuView.prototype = $extend(GameState.prototype,{
 		new TextButton(centeringFlow,"Start game",function() {
 			App.instance.switchState(new PlayView());
 		},Colors.BLUE,null,0.8);
+		centeringFlow.addSpacing(Gui.scaleAsInt(100));
+		new Text("version: " + hxd_Res.get_loader().loadCache("version.txt",hxd_res_Resource).entry.getText(),centeringFlow,0.5);
 	}
 	,__class__: MenuView
 });
@@ -28481,6 +28485,9 @@ hxd_fs_FileEntry.__name__ = "hxd.fs.FileEntry";
 hxd_fs_FileEntry.prototype = {
 	getBytes: function() {
 		return null;
+	}
+	,getText: function() {
+		return this.getBytes().toString();
 	}
 	,open: function() {
 	}
