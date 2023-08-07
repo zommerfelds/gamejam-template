@@ -31,6 +31,8 @@ git push -u origin main
 ```
 
 * Optional: enable GitHub pages in the repo settings (`/settings/pages`)
+  * Set to `GitHub Actions`
+  * Also required: `Settings -> Action -> General -> Workflow permissions` and choose `Read and write permissions`
 
 ### Building
 
