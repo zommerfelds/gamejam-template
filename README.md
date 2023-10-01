@@ -47,7 +47,7 @@ git push -u origin main
 
 ## Random links for game jams
 
-* Sound generator: [jsfxr](https://sfxr.me/)
+* Sound generator: [jsfxr](https://sfxr.me/) https://rxi.itch.io/sfxia
 * Music tool: [Bosca Ceoil download](https://boscaceoil.net/downloads/boscaceoil_win_v2.zip)
 * Level editor: [LDtk](https://ldtk.io/)
 * AI generated music: https://ecrettmusic.com/
